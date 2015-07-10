@@ -6,7 +6,7 @@ var pg = require('pg');
 var dbutils = {
     saveToken: function(token, userid) {
         pg.connect(process.env.DATABASE_URL, function (err, client, done) {
-            client.query('INSERT INTO tokens (userid, token) VALUES ($1, $2) ON CONFLICT DO UPDATE SET token = excluded.token', [userid, token], function (err, result) {
+            client.query('SELECT upsert_token($1, $2)', [userid, token], function (err, result) {
                 done();
                 if (err) {
                     console.error(err);
