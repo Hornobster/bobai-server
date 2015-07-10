@@ -1,0 +1,19 @@
+# Ignore all dot files
+.*
+
+# Ignore node_modules
+node_modules
+
+# Ignore bower_components
+bower_components
+
+!.gitignore
+
+*.log
+
+.android-client
+client/platforms
+client/plugins
+client/resources
+
+server/uploads
