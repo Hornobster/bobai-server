@@ -5,7 +5,6 @@ var pg = require('pg');
 
 var dbutils = {
     saveToken: function(token, userid) {
-        console.error('token', token);
         pg.connect(process.env.DATABASE_URL, function (err, client, done) {
             client.query('SELECT upsert_token($1, $2)', [userid, token], function (err, result) {
                 done();

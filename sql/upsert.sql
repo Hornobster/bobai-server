@@ -1,4 +1,6 @@
-CREATE FUNCTION upsert_token(uid INTEGER, t VARCHAR(250)) RETURNS VOID AS
+drop function if exists upsert_token(INTEGER, CHAR(124));
+
+CREATE FUNCTION upsert_token(uid INTEGER, t CHAR(124)) RETURNS VOID AS
 $$
 BEGIN
     LOOP
@@ -11,7 +13,7 @@ BEGIN
         -- if someone else inserts the same key concurrently,
         -- we could get a unique-key failure
         BEGIN
-            INSERT INTO tokens(userid, token) VALUES (userid, t);
+            INSERT INTO tokens(userid, token) VALUES (uid, t);
             RETURN;
         EXCEPTION WHEN unique_violation THEN
             -- do nothing, and loop to try the UPDATE again

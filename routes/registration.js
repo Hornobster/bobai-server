@@ -46,11 +46,10 @@ var registration = {
                 client.query(query, queryParams, function (err, result) {
                     done();
                     if (err) {
-                        console.error(err); // TODO check
-                        if (err.code === 'ER_DUP_ENTRY') { // username, email or phone number not available
+                        if (err.code === '23505') { // username, email or phone number not available
                             // investigate
                             pg.connect(process.env.DATABASE_URL, function (err, client, done) {
-                                client.query('SELECT SUM(username = $1) AS u, SUM(email = $2) AS e, SUM(phone = $3) AS p FROM users', [user.username, user.email, user.phone], function (err, result) {
+                                client.query('SELECT SUM(CASE WHEN username = $1 THEN 1 ELSE 0 END) AS u, SUM(CASE WHEN email = $2 THEN 1 ELSE 0 END) AS e, SUM(CASE WHEN phone = $3 THEN 1 ELSE 0 END) AS p FROM users', [user.username, user.email, user.phone], function (err, result) {
                                     done();
                                     if (err) {
                                         console.error(err);
@@ -63,9 +62,9 @@ var registration = {
                                     }
                                     else {
                                         var duplicates = {
-                                            username: result[0].u > 0,
-                                            email: result[0].e > 0,
-                                            phone: result[0].p > 0
+                                            username: result.rows[0].u > 0,
+                                            email: result.rows[0].e > 0,
+                                            phone: result.rows[0].p > 0
                                         };
 
                                         res.status(400);
