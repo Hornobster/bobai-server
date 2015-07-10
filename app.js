@@ -3,7 +3,6 @@
  */
 var express = require('express');
 var bodyParser = require('body-parser');
-var dbutils = require('./utils/dbutils.js');
 var config = require('./config.js');
 var fs = require('fs');
 var multer = require('multer');
@@ -58,8 +57,5 @@ var server = app.listen(process.env.PORT || config.serverInfo.defaultPort, funct
     var host = server.address().address;
     var port = server.address().port;
 
-    // initialize tokens DB
-    dbutils.initializeDB();
-
-    console.log('Example app listening at http://%s:%s', host, port);
+    console.log('Bobai listening at https://%s:%s', host, port);
 });

@@ -2,11 +2,9 @@
  * Created by carlovespa on 06/02/15.
  */
 var bcrypt = require('bcrypt');
-var mysql = require('mysql');
+var pg = require('pg');
 var config = require('../config.js');
-
-// create a DB connection object (still not actually connected)
-var connection = mysql.createConnection(config.dbInfo);
+var utils = require('../utils/genericutils.js');
 
 var registration = {
     signup: function(req, res) {
@@ -40,41 +38,62 @@ var registration = {
                 phone: phone.replace(/\s+/g, '') // remove whitespaces
             };
 
-            // add user data to DB
-            connection.query('INSERT INTO users SET ?', user, function (err, result) {
-                if (err) {
-                    if (err.code === 'ER_DUP_ENTRY') { // username, email or phone number not available
-                        // investigate
-                        // TODO error checking
-                        connection.query('SELECT SUM(username = ?) AS u, SUM(email = ?) AS e, SUM(phone = ?) AS p FROM users', [user.username, user.email, user.phone], function(err, result) {
-                            var duplicates = {
-                                username: result[0].u > 0,
-                                email: result[0].e > 0,
-                                phone: result[0].p > 0
-                            };
+            var queryParams = [];
+            var query = utils.genInsertIntoQuery('users', user, queryParams);
 
-                            res.status(400);
-                            res.json({
-                                status: 400,
-                                message: config.statusMessages.alreadyInUse,
-                                duplicates: duplicates
+            // add user data to DB
+            pg.connect(process.env.DATABASE_URL, function (err, client, done) {
+                client.query(query, queryParams, function (err, result) {
+                    done();
+                    if (err) {
+                        console.error(err); // TODO check
+                        if (err.code === 'ER_DUP_ENTRY') { // username, email or phone number not available
+                            // investigate
+                            pg.connect(process.env.DATABASE_URL, function (err, client, done) {
+                                client.query('SELECT SUM(username = $1) AS u, SUM(email = $2) AS e, SUM(phone = $3) AS p FROM users', [user.username, user.email, user.phone], function (err, result) {
+                                    done();
+                                    if (err) {
+                                        console.error(err);
+                                        res.status(500);
+                                        res.json({
+                                            status: 500,
+                                            message: config.statusMessages.internalError,
+                                            error: err
+                                        });
+                                    }
+                                    else {
+                                        var duplicates = {
+                                            username: result[0].u > 0,
+                                            email: result[0].e > 0,
+                                            phone: result[0].p > 0
+                                        };
+
+                                        res.status(400);
+                                        res.json({
+                                            status: 400,
+                                            message: config.statusMessages.alreadyInUse,
+                                            duplicates: duplicates
+                                        });
+                                    }
+                                });
                             });
-                        });
-                    } else { // other error
-                        res.status(500);
+                        } else { // other error
+                            res.status(500);
+                            res.json({
+                                status: 500,
+                                message: config.statusMessages.internalError,
+                                error: err
+                            });
+                        }
+                    }
+                    else {
+                        res.status(200);
                         res.json({
-                            status: 500,
-                            message: config.statusMessages.internalError,
-                            error: err
+                            status: 200,
+                            message: config.statusMessages.userSignupSuccess
                         });
                     }
-                } else {
-                    res.status(200);
-                    res.json({
-                        status: 200,
-                        message: config.statusMessages.userSignupSuccess
-                    });
-                }
+                });
             });
         } else { // email, username and password are invalid
             res.status(400);

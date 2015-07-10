@@ -3,12 +3,6 @@
  */
 
 module.exports = {
-    dbInfo: {
-        host     : 'localhost',
-        user     : 'root',
-        password : '',
-        database: 'lothar'
-    },
     tokenInfo: {
         tokenDuration: 7, // in days
         jwtSecret: 'come.dovrei.nascondere.sta.roba?'

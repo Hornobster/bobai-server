@@ -4,7 +4,6 @@
 
 var jwt = require('jwt-simple');
 var config = require('../config.js');
-var auth = require('../routes/auth.js');
 var dbutils = require('../utils/dbutils.js');
 
 module.exports = function(req, res, next) {

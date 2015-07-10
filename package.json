@@ -1,5 +1,5 @@
 {
-  "name": "server",
+  "name": "bobai",
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
@@ -12,7 +12,6 @@
     "url": "https://github.com/Hornobster/lothar.git"
   },
   "author": "Carlo Vespa, Carlo Cannas, Elias Mahdavi",
-  "license": "ISC",
   "bugs": {
     "url": "https://github.com/Hornobster/lothar/issues"
   },
@@ -23,7 +22,7 @@
     "express": "^4.11.2",
     "jwt-simple": "^0.2.0",
     "multer": "^0.1.8",
-    "mysql": "^2.5.4",
+    "pg": "^4.4.0",
     "sqlite3": "^3.0.4"
   }
 }

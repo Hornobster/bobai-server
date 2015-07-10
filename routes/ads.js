@@ -2,56 +2,64 @@
  * Created by carlovespa on 08/02/15.
  */
 
-var mysql = require('mysql');
+var pg = require('pg');
 var config = require('../config.js');
-
-// create a DB connection object (still not actually connected)
-var connection = mysql.createConnection(config.dbInfo);
+var utils = require('../utils/genericutils.js');
 
 var ads = {
-    getByUserId: function(req, res) {
-        var query = 'SELECT * FROM ads WHERE userid = ?';
+    getByUserId: function (req, res) {
+        var query = 'SELECT * FROM ads WHERE userid = $1';
         var queryParams = [req.params.userid];
 
         if (req.query.category) {
-            query += ' AND category = ?';
+            query += ' AND category = $2';
             queryParams.push(req.query.category);
         }
 
         query += ' ORDER BY date_expires';
 
-        connection.query(query, queryParams, function(err, result) {
-            if (err) {
-                res.status(500);
-                res.json({
-                    status: 500,
-                    message: config.statusMessages.internalError,
-                    error: err
-                });
-            } else {
-                res.status(200);
-                res.json(result);
-            }
+        pg.connect(process.env.DATABASE_URL, function (err, client, done) {
+            client.query(query, queryParams, function (err, result) {
+                done();
+                if (err) {
+                    console.error(err);
+                    res.status(500);
+                    res.json({
+                        status: 500,
+                        message: config.statusMessages.internalError,
+                        error: err
+                    });
+                }
+                else {
+                    res.status(200);
+                    res.json(result.rows);
+                }
+            });
         });
     },
 
-    getById: function(req, res) {
-        connection.query('SELECT * FROM ads WHERE id = ?', req.params.id, function(err, result) {
-            if (err) {
-                res.status(500);
-                res.json({
-                    status: 500,
-                    message: config.statusMessages.internalError,
-                    error: err
-                });
-            } else {
-                res.status(200);
-                res.json(result[0]);
-            }
+    getById: function (req, res) {
+        pg.connect(process.env.DATABASE_URL, function (err, client, done) {
+            client.query('SELECT * FROM ads WHERE id = $1', [req.params.id], function (err, result) {
+                done();
+                if (err) {
+                    console.error(err);
+                    res.status(500);
+                    res.json({
+                        status: 500,
+                        message: config.statusMessages.internalError,
+                        error: err
+                    });
+                }
+                else {
+                    res.status(200);
+                    res.json(result.rows[0]);
+                }
+            });
         });
     },
 
-    getNearby: function(req, res) {
+    getNearby: function (req, res) {
         var lat = parseFloat(req.params.lat) || '';
         var lon = parseFloat(req.params.lon) || '';
         var limit = parseInt(req.params.limit) || '';
@@ -68,32 +76,37 @@ var ads = {
         lat *= config.geo.lonLatDBScale;
         lon *= config.geo.lonLatDBScale;
 
-        var query = 'SELECT *, GCDist(?, ?, lat, lon) AS dist FROM ads';
+        var query = 'SELECT *, GCDist($1, $2, lat, lon) AS dist FROM ads' +
+            ' HAVING dist < radius ORDER BY date_created DESC LIMIT $3';
         var queryParams = [lat, lon, limit];
 
         if (req.query.category) {
-            query = 'SELECT *, GCDist(?, ?, lat, lon) AS dist FROM ads WHERE category = ?';
+            query = 'SELECT *, GCDist($1, $2, lat, lon) AS dist FROM ads WHERE category = $3' +
+                ' HAVING dist < radius ORDER BY date_created DESC LIMIT $4';
             queryParams = [lat, lon, req.query.category, limit];
         }
 
-        query += ' HAVING dist < radius ORDER BY date_created DESC LIMIT ?';
-
-        connection.query(query, queryParams, function(err, result) {
-            if (err) {
-                res.status(500);
-                res.json({
-                    status: 500,
-                    message: config.statusMessages.internalError,
-                    error: err
-                });
-            } else {
-                res.status(200);
-                res.json(result);
-            }
+        pg.connect(process.env.DATABASE_URL, function (err, client, done) {
+            client.query(query, queryParams, function (err, result) {
+                done();
+                if (err) {
+                    console.error(err);
+                    res.status(500);
+                    res.json({
+                        status: 500,
+                        message: config.statusMessages.internalError,
+                        error: err
+                    });
+                }
+                else {
+                    res.status(200);
+                    res.json(result.rows);
+                }
+            });
         });
     },
 
-    postAd: function(req, res) {
+    postAd: function (req, res) {
         var title = req.body.title || '';
         var description = req.body.description || '';
         var category = req.body.category || '';
@@ -114,7 +127,7 @@ var ads = {
         }
 
         var date_expires = new Date();
-        date_expires.setTime(date_expires.getTime() + (duration*60*60*1000));
+        date_expires.setTime(date_expires.getTime() + (duration * 60 * 60 * 1000));
 
         var ad = {
             userid: req.loggedUserId,
@@ -128,22 +141,30 @@ var ads = {
             homeDelivery: homeDelivery
         };
 
-        connection.query('INSERT INTO ads SET ?', ad, function(err, result){
-            if (err) {
-                res.status(500);
-                res.json({
-                    status: 500,
-                    message: config.statusMessages.internalError,
-                    error: err
-                });
-            } else {
-                res.status(200);
-                res.json({
-                    status: 200,
-                    message: config.statusMessages.adPostSuccess,
-                    adId: result.insertId
-                });
-            }
+        var queryParams = [];
+        var query = utils.genInsertIntoQuery('ads', ad, queryParams);
+
+        pg.connect(process.env.DATABASE_URL, function (err, client, done) {
+            client.query(query, queryParams, function (err, result) {
+                done();
+                if (err) {
+                    console.error(err);
+                    res.status(500);
+                    res.json({
+                        status: 500,
+                        message: config.statusMessages.internalError,
+                        error: err
+                    });
+                }
+                else {
+                    res.status(200);
+                    res.json({
+                        status: 200,
+                        message: config.statusMessages.adPostSuccess,
+                        adId: result.insertId // TODO check
+                    });
+                }
+            });
         });
     }
 };

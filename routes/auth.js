@@ -4,12 +4,9 @@
 
 var jwt = require('jwt-simple');
 var config = require('./../config.js');
-var mysql = require('mysql');
+var pg = require('pg');
 var bcrypt = require('bcrypt');
 var dbutils = require('../utils/dbutils.js');
-
-// create a DB connection object (still not actually connected)
-var connection = mysql.createConnection(config.dbInfo);
 
 var auth = {
     login: function(req, res) {
@@ -17,7 +14,6 @@ var auth = {
         var password = req.body.password || '';
 
         if (username === '' || password === '') {
-
             res.status(403);
             res.json({
                 status: 403,
@@ -71,22 +67,27 @@ var auth = {
     },
 
     validate: function(username, password, callback) {
-        connection.query('SELECT * FROM users WHERE username = ?', username, function(err, result) {
-            if (err || result.length === 0) { // DB error or non existing user
-                callback(false);
-            } else {
-                var hash = result[0].password;
-                if (bcrypt.compareSync(password, hash)) { // passwords match
-                    callback({
-                        id: result[0].id,
-                        username: result[0].username,
-                        email: result[0].email,
-                        phone: result[0].phone
-                    });
-                } else { // passwords don't match
+        pg.connect(process.env.DATABASE_URL, function (err, client, done) {
+            client.query('SELECT * FROM users WHERE username = $1', [username], function (err, result) {
+                done();
+                if (err || result.rows.length === 0) { // DB error or non existing user
+                    console.error(err);
                     callback(false);
                 }
-            }
+                else {
+                    var hash = result.rows[0].password;
+                    if (bcrypt.compareSync(password, hash)) { // passwords match
+                        callback({
+                            id: result.rows[0].id,
+                            username: result.rows[0].username,
+                            email: result.rows[0].email,
+                            phone: result.rows[0].phone
+                        });
+                    } else { // passwords don't match
+                        callback(false);
+                    }
+                }
+            });
         });
     }
 };
