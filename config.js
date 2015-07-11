@@ -5,7 +5,7 @@
 module.exports = {
     tokenInfo: {
         tokenDuration: 7, // in days
-        jwtSecret: 'come.dovrei.nascondere.sta.roba?'
+        jwtSecret: process.env.JWT_SECRET
     },
     adsInfo: {
         titleMaxLength: 100,
