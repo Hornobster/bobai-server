@@ -31,7 +31,7 @@ var proposals = {
                 }
                 else {
                     res.status(200);
-                    res.json(result);
+                    res.json(result.rows);
                 }
             });
         });
@@ -68,7 +68,7 @@ var proposals = {
                 }
                 else {
                     res.status(200);
-                    res.json(result);
+                    res.json(result.rows);
                 }
             });
         });
@@ -98,8 +98,8 @@ var proposals = {
             adid: adId,
             price: price,
             notes: notes,
-            lat: lat * config.geo.lonLatDBScale,
-            lon: lon * config.geo.lonLatDBScale,
+            lat: Math.floor(lat * config.geo.lonLatDBScale),
+            lon: Math.floor(lon * config.geo.lonLatDBScale),
             photo: photo
         };
 

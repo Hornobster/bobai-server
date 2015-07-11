@@ -76,13 +76,13 @@ var ads = {
         lat *= config.geo.lonLatDBScale;
         lon *= config.geo.lonLatDBScale;
 
-        var query = 'SELECT *, GCDist($1, $2, lat, lon) AS dist FROM ads' +
-            ' HAVING dist < radius ORDER BY date_created DESC LIMIT $3';
+        var query = 'SELECT * FROM (SELECT *, GCDist($1, $2, lat, lon) AS dist FROM ads' +
+            ' ORDER BY date_created DESC LIMIT $3) t WHERE dist < radius';
         var queryParams = [lat, lon, limit];
 
         if (req.query.category) {
-            query = 'SELECT *, GCDist($1, $2, lat, lon) AS dist FROM ads WHERE category = $3' +
-                ' HAVING dist < radius ORDER BY date_created DESC LIMIT $4';
+            query = 'SELECT * FROM (SELECT *, GCDist($1, $2, lat, lon) AS dist FROM ads WHERE category = $3' +
+                ' ORDER BY date_created DESC LIMIT $4) t WHERE dist < radius';
             queryParams = [lat, lon, req.query.category, limit];
         }
 
@@ -135,8 +135,8 @@ var ads = {
             description: description,
             category: category,
             radius: radius,
-            lat: lat * config.geo.lonLatDBScale,
-            lon: lon * config.geo.lonLatDBScale,
+            lat: Math.floor(lat * config.geo.lonLatDBScale),
+            lon: Math.floor(lon * config.geo.lonLatDBScale),
             date_expires: date_expires,
             homeDelivery: homeDelivery
         };
