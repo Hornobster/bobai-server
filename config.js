@@ -18,6 +18,11 @@ module.exports = {
     serverInfo: {
         defaultPort: 3000
     },
+    awsInfo: {
+        accessKeyID: process.env.AWS_ACCESS_KEY_ID,
+        accessKeySecret: process.env.AWS_SECRET_ACCESS_KEY,
+        bucketName: process.env.S3_BUCKET_NAME
+    },
     statusMessages: {
         tokenExpired: 'Token expired',
         tokenInvalid: 'Invalid token',

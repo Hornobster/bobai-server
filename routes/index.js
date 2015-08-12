@@ -28,6 +28,7 @@ router.get('/api/adsNearby/:lat/:lon/:limit', ads.getNearby);
 router.get('/api/ads/:id', ads.getById);
 router.get('/api/adsOf/:userid', ads.getByUserId);
 router.get('/api/categories', categories.getCategories);
+router.get('/api/signS3', proposals.signS3);
 
 router.post('/api/ads', ads.postAd);
 router.post('/api/proposals', proposals.postProposal);

@@ -161,7 +161,7 @@ var ads = {
                     res.json({
                         status: 200,
                         message: config.statusMessages.adPostSuccess,
-                        adId: result.insertId // TODO check
+                        adId: result.rows[0].id
                     });
                 }
             });

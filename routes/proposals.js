@@ -8,7 +8,7 @@ var config = require('../config.js');
 var utils = require('../utils/genericutils.js');
 
 var proposals = {
-    getByUserId: function(req, res) {
+    getByUserId: function (req, res) {
         var query = 'SELECT ads.title, proposals.* FROM ads, proposals WHERE proposals.userid = $1 AND ads.id = proposals.adid';
         var queryParams = [req.params.userid];
 
@@ -37,7 +37,7 @@ var proposals = {
         });
     },
 
-    getByAdId: function(req, res) {
+    getByAdId: function (req, res) {
         var lat = parseFloat(req.params.lat) || '';
         var lon = parseFloat(req.params.lon) || '';
         var adid = parseInt(req.params.adid) || '';
@@ -74,17 +74,15 @@ var proposals = {
         });
     },
 
-    postProposal: function(req, res) {
-        var file = req.files.file;
-
+    postProposal: function (req, res) {
         var adId = req.body.adId || '';
         var price = req.body.price || '';
         var notes = req.body.notes || '';
         var lon = req.body.lon || '';
         var lat = req.body.lat || '';
-        var photo = file ? file.path : null;
+        var photoURL = req.body.photoURL || '';
 
-        if (adId === '' || lon === '' || lat === '' || price === '' || notes === '') {
+        if (adId === '' || lon === '' || lat === '' || price === '' || notes === '' || photoURL === '') {
             res.status(400);
             res.json({
                 status: 400,
@@ -100,7 +98,7 @@ var proposals = {
             notes: notes,
             lat: Math.floor(lat * config.geo.lonLatDBScale),
             lon: Math.floor(lon * config.geo.lonLatDBScale),
-            photo: photo
+            photo: photoURL
         };
 
         var queryParams = [];
@@ -123,10 +121,30 @@ var proposals = {
                     res.json({
                         status: 200,
                         message: config.statusMessages.proposalPostSuccess,
-                        proposalId: result.insertId // TODO check
+                        proposalId: result.rows[0].id
                     });
                 }
             });
+        });
+    },
+
+    signS3: function (req, res) {
+        var userid = req.loggedUserId;
+
+        var filename = '' + Date.now() + userid + '.jpg';
+        var isoDate = utils.toISOString(new Date());
+
+        var signedURL = utils.genAWSS3Request(config.awsInfo.accessKeyID,
+            config.awsInfo.accessKeySecret,
+            config.awsInfo.bucketName,
+            isoDate,
+            filename);
+
+        var imageURL = 'https://s3.amazonaws.com/' + config.awsInfo.bucketName + '/' + filename;
+
+        res.json({
+            signedUrl: signedURL,
+            imageUrl: imageURL
         });
     }
 };
