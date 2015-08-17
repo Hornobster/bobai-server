@@ -114,9 +114,9 @@ var ads = {
         var lat = req.body.lat || '';
         var lon = req.body.lon || '';
         var duration = req.body.duration || '';
-        var homeDelivery = req.body.homeDelivery || 0;
+        var home_delivery = req.body.home_delivery || 0;
 
-        if (title === '' || description === '' || category === '' || radius === '' || lat === '' || lon === '' || duration === '' || homeDelivery === '' ||
+        if (title === '' || description === '' || category === '' || radius === '' || lat === '' || lon === '' || duration === '' || home_delivery === '' ||
             title.length > config.adsInfo.titleMaxLength || description.length > config.adsInfo.descriptionMaxLength || duration > config.adsInfo.maxDuration) {
             res.status(400);
             res.json({
@@ -138,7 +138,7 @@ var ads = {
             lat: Math.floor(lat * config.geo.lonLatDBScale),
             lon: Math.floor(lon * config.geo.lonLatDBScale),
             date_expires: date_expires,
-            homeDelivery: homeDelivery
+            home_delivery: home_delivery
         };
 
         var queryParams = [];
