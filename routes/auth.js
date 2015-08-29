@@ -79,9 +79,7 @@ var auth = {
                     if (bcrypt.compareSync(password, hash)) { // passwords match
                         callback({
                             id: result.rows[0].id,
-                            username: result.rows[0].username,
-                            email: result.rows[0].email,
-                            phone: result.rows[0].phone
+                            username: result.rows[0].username
                         });
                     } else { // passwords don't match
                         callback(false);
