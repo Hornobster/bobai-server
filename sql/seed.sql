@@ -1,4 +1,4 @@
-INSERT INTO categories VALUES (DEFAULT, 'Animali/oggetti smarriti');
-INSERT INTO categories VALUES (DEFAULT, 'Offerte di lavoro');
-INSERT INTO categories VALUES (DEFAULT, 'Prima necessitá');
-INSERT INTO categories VALUES (DEFAULT, 'Utensili/attrezzature');
+DELETE FROM categories WHERE (1=1);
+
+INSERT INTO categories VALUES (DEFAULT, 'Animali smarriti');
+INSERT INTO categories VALUES (DEFAULT, 'Altro');
