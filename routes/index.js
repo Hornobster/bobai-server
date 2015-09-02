@@ -10,6 +10,7 @@ var registration = require('./registration.js');
 var proposals = require('./proposals.js');
 var ads = require('./ads.js');
 var categories = require('./categories.js');
+var info = require('./info.js');
 
 /*
 routes that can be accessed by anyone
@@ -29,6 +30,7 @@ router.get('/api/ads/:id', ads.getById);
 router.get('/api/adsOf/:userid', ads.getByUserId);
 router.get('/api/categories', categories.getCategories);
 router.get('/api/signS3', proposals.signS3);
+router.get('/api/username/:userid', info.getUsername);
 
 router.post('/api/ads', ads.postAd);
 router.post('/api/proposals', proposals.postProposal);
