@@ -35,6 +35,7 @@ module.exports = {
         dataInvalid: 'Invalid data',
         adPostSuccess: 'Ad created successfully!',
         proposalPostSuccess: 'Proposal created successfully!',
+        messagePostSuccess: 'Message sent successfully!',
         userSignupSuccess: 'User successfully registered',
         alreadyInUse: 'Username, email or phone number already in use!'
     }
