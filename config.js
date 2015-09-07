@@ -24,7 +24,8 @@ module.exports = {
         bucketName: process.env.S3_BUCKET_NAME
     },
     gcmInfo: {
-        apiKey: process.env.GCM_API_KEY
+        apiKeyAndroid: process.env.GCM_API_KEY_ANDROID,
+        apiKeyIos: process.env.GCM_API_KEY_IOS
     },
     statusMessages: {
         tokenExpired: 'Token expired',

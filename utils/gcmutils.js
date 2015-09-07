@@ -6,7 +6,8 @@ var gcm = require('node-gcm');
 var pg = require('pg');
 var config = require('../config.js');
 
-var sender = new gcm.Sender(config.gcmInfo.apiKey);
+var senderAndroid = new gcm.Sender(config.gcmInfo.apiKeyAndroid);
+var senderIOS = new gcm.Sender(config.gcmInfo.apiKeyIos);
 
 var gcmutils = {
     sendMessageNotificationToUserId: function (userId, title, text, propId) {
@@ -19,6 +20,7 @@ var gcmutils = {
                 else {
                     if (result.rows[0]) {
                         var registrationId = result.rows[0].registrationid;
+                        var os = result.rows[0].os;
 
                         var message = new gcm.Message();
 
@@ -34,14 +36,25 @@ var gcmutils = {
                         var registrationIds = [];
                         registrationIds.push(registrationId);
 
-                        sender.send(message, registrationIds, function (err, result) {
-                            if (err) {
-                                console.error(err);
-                            }
-                            else {
-                                console.log(result);
-                            }
-                        });
+                        if (os == 'A') {
+                            senderAndroid.send(message, registrationIds, function (err, result) {
+                                if (err) {
+                                    console.error(err);
+                                } else {
+                                    console.log(result);
+                                }
+                            });
+                        }
+
+                        if (os == 'I') {
+                            senderIOS.send(message, registrationIds, function (err, result) {
+                                if (err) {
+                                    console.error(err);
+                                } else {
+                                    console.log(result);
+                                }
+                            });
+                        }
                     } else {
                         console.log('User is not GCM registered. Userid: ', userId);
                     }

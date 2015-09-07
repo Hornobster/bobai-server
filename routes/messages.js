@@ -205,14 +205,15 @@ var messages = {
     },
     registerGCMClient: function(req, res) {
         var registrationId = req.body.registrationId || '';
+        var os = req.body.os || '';
 
         pg.connect(process.env.DATABASE_URL, function (err, client, done) {
-            client.query('SELECT upsert_registrationid($1, $2)', [req.loggedUserId, registrationId], function (err, result) {
+            client.query('SELECT upsert_registrationid($1, $2, $3)', [req.loggedUserId, registrationId, os], function (err, result) {
                 done();
                 if (err) {
                     console.error(err);
                 } else {
-                    console.log('Registered GCM userid:', req.loggedUserId, registrationId);
+                    console.log('Registered GCM userid:', req.loggedUserId);
                 }
             });
         });
