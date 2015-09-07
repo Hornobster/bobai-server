@@ -17,30 +17,34 @@ var gcmutils = {
                     console.error(err);
                 }
                 else {
-                    var registrationId = result.rows[0].registrationid;
+                    if (result.rows[0]) {
+                        var registrationId = result.rows[0].registrationid;
 
-                    var message = new gcm.Message();
+                        var message = new gcm.Message();
 
-                    message.addData({
-                        title: title,
-                        message: text,
-                        summaryText: '%n% nuovi messaggi.',
-                        style: 'inbox',
-                        notId: propId,
-                        image: "https://s3.amazonaws.com/bobai-uploads/bobai.png"
-                    });
+                        message.addData({
+                            title: title,
+                            message: text,
+                            summaryText: '%n% nuovi messaggi.',
+                            style: 'inbox',
+                            notId: propId,
+                            image: "https://s3.amazonaws.com/bobai-uploads/bobai.png"
+                        });
 
-                    var registrationIds = [];
-                    registrationIds.push(registrationId);
+                        var registrationIds = [];
+                        registrationIds.push(registrationId);
 
-                    sender.send(message, registrationIds, function (err, result) {
-                        if (err) {
-                            console.error(err);
-                        }
-                        else {
-                            console.log(result);
-                        }
-                    });
+                        sender.send(message, registrationIds, function (err, result) {
+                            if (err) {
+                                console.error(err);
+                            }
+                            else {
+                                console.log(result);
+                            }
+                        });
+                    } else {
+                        console.log('User is not GCM registered. Userid: ', userId);
+                    }
                 }
             });
         });
