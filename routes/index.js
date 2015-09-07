@@ -39,6 +39,7 @@ router.get('/api/username/ad/:adid', info.getAdOwnerUsername);
 
 router.post('/api/ads', ads.postAd);
 router.post('/api/proposals', proposals.postProposal);
+router.post('/api/messages/register', messages.registerGCMClient);
 router.post('/api/messages/:propid', messages.postMessage);
 
 /*

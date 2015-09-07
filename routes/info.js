@@ -49,7 +49,7 @@ var info = {
         }
 
         pg.connect(process.env.DATABASE_URL, function (err, client, done) {
-            client.query('SELECT users.username FROM users, proposals WHERE proposals.id = $1 AND users.id = proposals.userid', [propid], function (err, result) {
+            client.query('SELECT users.id, users.username FROM users, proposals WHERE proposals.id = $1 AND users.id = proposals.userid', [propid], function (err, result) {
                 done();
                 if (err) {
                     console.error(err);
@@ -79,7 +79,7 @@ var info = {
         }
 
         pg.connect(process.env.DATABASE_URL, function (err, client, done) {
-            client.query('SELECT users.username FROM users, ads WHERE ads.id = $1 AND users.id = ads.userid', [adid], function (err, result) {
+            client.query('SELECT users.id, users.username FROM users, ads WHERE ads.id = $1 AND users.id = ads.userid', [adid], function (err, result) {
                 done();
                 if (err) {
                     console.error(err);

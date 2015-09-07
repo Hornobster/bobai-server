@@ -23,6 +23,9 @@ module.exports = {
         accessKeySecret: process.env.AWS_SECRET_ACCESS_KEY,
         bucketName: process.env.S3_BUCKET_NAME
     },
+    gcmInfo: {
+        apiKey: process.env.GCM_API_KEY
+    },
     statusMessages: {
         tokenExpired: 'Token expired',
         tokenInvalid: 'Invalid token',

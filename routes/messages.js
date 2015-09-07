@@ -4,6 +4,7 @@
 var pg = require('pg');
 var config = require('../config.js');
 var utils = require('../utils/genericutils.js');
+var gcmutils = require('../utils/gcmutils.js');
 
 var rollback = function(client, done) {
     client.query('ROLLBACK', function(err) {
@@ -117,8 +118,10 @@ var messages = {
     postMessage: function (req, res) {
         var propId = parseInt(req.params.propid) || '';
         var text = req.body.text.trim() || '';
+        var adId = req.body.adId || '';
+        var receiverId = req.body.receiverId || '';
 
-        if (propId === '' || text === '' || text.length > 500) {
+        if (propId === '' || text === '' || text.length > 500 || adId === '' || receiverId === '') {
             res.status(400);
             res.json({
                 status: 400,
@@ -173,6 +176,18 @@ var messages = {
                                         status: 200,
                                         message: result.rows[0]
                                     });
+
+                                    pg.connect(process.env.DATABASE_URL, function (err, client, done) {
+                                        client.query('SELECT title FROM ads WHERE id=$1', [adId], function (err, result) {
+                                            done();
+                                            if (err) {
+                                                console.error(err);
+                                            } else {
+                                                var title = result.rows[0].title;
+                                                gcmutils.sendMessageNotificationToUserId(receiverId, title, text, propId);
+                                            }
+                                        });
+                                    });
                                 }
                             });
                         });
@@ -184,6 +199,20 @@ var messages = {
                             message: config.statusMessages.unauthorized
                         });
                     }
+                }
+            });
+        });
+    },
+    registerGCMClient: function(req, res) {
+        var registrationId = req.body.registrationId || '';
+
+        pg.connect(process.env.DATABASE_URL, function (err, client, done) {
+            client.query('SELECT upsert_registrationid($1, $2)', [req.loggedUserId, registrationId], function (err, result) {
+                done();
+                if (err) {
+                    console.error(err);
+                } else {
+                    console.log('Registered GCM userid:', req.loggedUserId, registrationId);
                 }
             });
         });
